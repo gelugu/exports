@@ -41,7 +41,7 @@ def handle_edit(live: Live, exports_layout: Layout, index: int, exports: List[Ex
         current = exports[index].value
 
     while True:
-        layout_index = f"{index}_{exports[index].key}"
+        layout_index = f"{exports[index].file_name}_{exports[index].line_number}"
         export_index = "key"
         if not edit_key:
             export_index = "value"
@@ -77,5 +77,3 @@ def handle_edit(live: Live, exports_layout: Layout, index: int, exports: List[Ex
             exports[index].key = current
         else:
             exports[index].value = current
-
-        exports_layout[layout_index].name = f"{index}_{exports[index].key}"

@@ -1,7 +1,7 @@
 from rich.layout import Layout
 from rich.live import Live
 from input import get_key, handle_edit
-from exports import get_exports, render_exports, get_export_layout, main_hints
+from exports import get_exports, render_exports, get_export_layout, save_exports
 
 
 def main():
@@ -33,6 +33,7 @@ def main():
                 edit_key = False
             if key == "return":
                 handle_edit(live, exports_layout, index, exports, edit_key)
+                save_exports(exports)
 
 
 if __name__ == "__main__":
