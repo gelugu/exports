@@ -4,8 +4,12 @@ from typing import List
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.text import Text
-from config import default_rc_file, key_regex, value_regex, home_dir, rc_file_regex, rc_export_section_start, \
-    rc_export_section_end
+from rich.progress import Progress
+
+import cache
+from config import default_rc_file, home_dir, rc_file_regex, key_regex, value_regex
+from hints import use_main_hints
+from styles import edit_style, hints_style, file_name_style
 
 
 class Export:
@@ -83,10 +87,22 @@ def get_export_layout(layout: Layout, exports: List[Export]):
     return exports_layout
 
 
-def save_exports(exports: List[Export]):
+def save_exports(exports: List[Export], live: Live):
+    progress = Progress()
+
+    save_task = progress.add_task("[red]Saving...", total=len(exports))
+    cache.main_layout["help"].update(Panel(progress))
+
+    index = 0
+
     for export in exports:
         with open(export.file_name) as file:
             lines = [line.rstrip() for line in file.readlines()]
             lines[export.line_number] = f"export {export.key}={export.value}"
         with open(export.file_name, mode="w") as file:
             file.write("\n".join(lines))
+        index += 1
+        progress.update(save_task, completed=index)
+        live.refresh()
+
+    use_main_hints()
