@@ -2,6 +2,7 @@ import re
 from os import listdir
 from typing import List
 from rich.layout import Layout
+from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
 from rich.progress import Progress
@@ -13,7 +14,7 @@ from styles import edit_style, hints_style, file_name_style
 
 
 class Export:
-    def __init__(self, line, file_name: str, line_number: int):
+    def __init__(self, line: str, file_name: str, line_number: int):
         self.key = re.search(rf"export\s({key_regex})=", line).group(1)
         self.value = re.search(rf"export\s{key_regex}=({value_regex})", line).group(1)
         self.file_name = file_name
@@ -43,7 +44,6 @@ def get_exports() -> List[Export]:
 
 
 def render_exports(layout: Layout, exports: List[Export], active_index: int = 0, edit_key: bool = True):
-    edit_style = "blue"
     for export in exports:
         export_layout = layout[f"{export.file_name}_{export.line_number}"]
 
@@ -62,12 +62,6 @@ def render_exports(layout: Layout, exports: List[Export], active_index: int = 0,
 
 
 def get_export_layout(layout: Layout, exports: List[Export]):
-    hints = ["q - quit", "arrows - navigation", "enter - edit"]
-    hints_panel = Panel(Text(" | ").join([
-        Text(hint, style="on blue")
-        for hint in hints
-    ]), title="Controls")
-
     exports_layout = Layout(name="exports")
     exports_layout.split(*[Layout(name=f"{export.file_name}_{export.line_number}", size=1) for export in exports])
     for export in exports:
@@ -75,14 +69,14 @@ def get_export_layout(layout: Layout, exports: List[Export]):
             Layout(name="key"),
             Layout("=", size=1),
             Layout(name="value"),
-            Layout(Text(export.file_name, style="italic", justify="right"))
+            Layout(Text(export.file_name, style=file_name_style, justify="right"))
         )
 
     layout.split(
         Panel(exports_layout, title="Exports"),
-        Layout(hints_panel, name="help", size=3),
-        Layout(Layout(), name="debug", size=10),
+        Layout(name="help", size=3),
     )
+    use_main_hints()
 
     return exports_layout
 

@@ -1,7 +1,12 @@
-from rich.layout import Layout
+from rich.panel import Panel
+from rich.prompt import Prompt, PromptType
+from rich.console import ConsoleRenderable, Console
 from rich.live import Live
+
+from hints import use_edit_hints
 from input import get_key, handle_edit
 from exports import get_exports, render_exports, get_export_layout, save_exports
+from cache import main_layout
 
 
 def main():
@@ -10,7 +15,6 @@ def main():
     index = 0
     edit_key = True
 
-    main_layout = Layout()
     exports_layout = get_export_layout(main_layout, exports)
 
     with Live(main_layout, screen=True, redirect_stderr=False, auto_refresh=False) as live:
@@ -32,8 +36,9 @@ def main():
             if key == "right":
                 edit_key = False
             if key == "return":
+                use_edit_hints()
                 handle_edit(live, exports_layout, index, exports, edit_key)
-                save_exports(exports)
+                save_exports(exports, live)
 
 
 if __name__ == "__main__":
