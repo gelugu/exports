@@ -4,7 +4,6 @@
 
 ToDo:
 - add section to rc file
-- correct input
 - config
 - save exports
 - add new exports

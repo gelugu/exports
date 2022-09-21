@@ -12,23 +12,52 @@ from exports import Export
 def get_key():
     old_settings = termios.tcgetattr(sys.stdin)
     tty.setcbreak(sys.stdin.fileno())
+
+    key_mapping = {
+        127: 'backspace',
+        10: 'return',
+        27: 'esc',
+        65: 'up',
+        66: 'down',
+        67: 'right',
+        68: 'left'
+    }
+
     try:
         while True:
-            b = os.read(sys.stdin.fileno(), 3).decode()
-            if len(b) == 3:
-                k = ord(b[2])
+            byte = os.read(sys.stdin.fileno(), 3).decode()
+            if len(byte) == 3:
+                k = ord(byte[2])
             else:
-                k = ord(b)
-            key_mapping = {
-                127: 'backspace',
-                10: 'return',
-                27: 'esc',
-                65: 'up',
-                66: 'down',
-                67: 'right',
-                68: 'left'
-            }
-            return key_mapping.get(k, chr(k))
+                k = ord(byte)
+            if k in key_mapping.keys():
+                return key_mapping.get(k, chr(k))
+            return byte
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+
+def get_char():
+    old_settings = termios.tcgetattr(sys.stdin)
+    tty.setcbreak(sys.stdin.fileno())
+
+    key_mapping = {
+        127: 'backspace',
+        10: 'return',
+        27: 'esc',
+    }
+
+    try:
+        while True:
+            byte = os.read(sys.stdin.fileno(), 3).decode()
+            try:
+                code = ord(byte)
+            except TypeError:
+                continue
+
+            if code in key_mapping.keys():
+                return key_mapping[code]
+            return byte
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
@@ -54,7 +83,7 @@ def handle_edit(live: Live, exports_layout: Layout, index: int, exports: List[Ex
         exports_layout[layout_index][export_index].size = len(current) + 1
         live.refresh()
 
-        key = get_key()
+        key = get_char()
         if key in ["esc", "return"]:
             break
         if key == "left":
