@@ -5,7 +5,6 @@
 ToDo:
 - add section to rc file
 - config
-- save exports
 - add new exports
 - remove exports
 
