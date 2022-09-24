@@ -6,7 +6,7 @@ from styles import hints_style
 
 hints_panel_name = "Controls"
 hints_divider = " | "
-main_hints = ["q - quit", "arrows - navigation", "enter - edit"]
+main_hints = ["q - quit", "arrows - navigation", "enter - edit", "d - delete"]
 edit_hints = ["enter, esc - finish"]
 
 

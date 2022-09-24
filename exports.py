@@ -61,7 +61,7 @@ def render_exports(layout: Layout, exports: List[Export], active_index: int = 0,
         export_layout["value"].size = len(export.value)
 
 
-def get_export_layout(layout: Layout, exports: List[Export]):
+def get_export_layout(exports: List[Export]):
     exports_layout = Layout(name="exports")
     exports_layout.split(*[Layout(name=f"{export.file_name}_{export.line_number}", size=1) for export in exports])
     for export in exports:
@@ -72,7 +72,7 @@ def get_export_layout(layout: Layout, exports: List[Export]):
             Layout(Text(export.file_name, style=file_name_style, justify="right"))
         )
 
-    layout.split(
+    cache.main_layout.split(
         Panel(exports_layout, title="Exports"),
         Layout(name="help", size=3),
     )
@@ -81,7 +81,7 @@ def get_export_layout(layout: Layout, exports: List[Export]):
     return exports_layout
 
 
-def save_exports(exports: List[Export], live: Live):
+def save_exports(exports: List[Export]):
     progress = Progress()
 
     save_task = progress.add_task("[red]Saving...", total=len(exports))
@@ -97,6 +97,13 @@ def save_exports(exports: List[Export], live: Live):
             file.write("\n".join(lines))
         index += 1
         progress.update(save_task, completed=index)
-        live.refresh()
 
     use_main_hints()
+
+
+def delete_export(export: Export):
+    with open(export.file_name) as file:
+        lines = [line.rstrip() for line in file.readlines()]
+        lines.remove(lines[export.line_number])
+    with open(export.file_name, mode="w") as file:
+        file.write("\n".join(lines))
