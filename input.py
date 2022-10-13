@@ -2,11 +2,11 @@ import os
 import sys
 import termios
 import tty
-from typing import List
 from rich.text import Text
 from rich.layout import Layout
 from rich.live import Live
-from exports import Export
+
+import cache
 
 
 def get_key():
@@ -62,25 +62,19 @@ def get_char():
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
-def handle_edit(live: Live, exports_layout: Layout, index: int, exports: List[Export], edit_key: bool):
-    input_index = len(exports[index].key)
-    current = exports[index].key
-    if not edit_key:
-        input_index = len(exports[index].value)
-        current = exports[index].value
+def handle_edit(live: Live, exports_layout: Layout, index: int):
+    input_index = len(cache.exports[index].line)
+    current = cache.exports[index].line
 
     while True:
-        layout_index = f"{exports[index].file_name}_{exports[index].line_number}"
-        export_index = "key"
-        if not edit_key:
-            export_index = "value"
+        layout_index = f"{cache.exports[index].file_name}_{cache.exports[index].line_number}"
 
-        exports_layout[layout_index][export_index].update(
+        exports_layout[layout_index]["line"].update(
             Text(current[:input_index + 1], style="blue") +
             Text(" ", style="blink underline blue") +
             Text(current[input_index + 1:], style="blue")
         )
-        exports_layout[layout_index][export_index].size = len(current) + 1
+        exports_layout[layout_index]["line"].size = len(current) + 1
         live.refresh()
 
         key = get_char()
@@ -102,7 +96,4 @@ def handle_edit(live: Live, exports_layout: Layout, index: int, exports: List[Ex
             current = f"{current[:input_index + 1]}{key}{current[input_index + 1:]}"
             input_index += 1
 
-        if edit_key:
-            exports[index].key = current
-        else:
-            exports[index].value = current
+        cache.exports[index].line = current
